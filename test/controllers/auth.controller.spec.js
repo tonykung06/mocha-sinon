@@ -29,7 +29,7 @@ describe('AuthController', () => {
       authController.setUser(user)
     })
 
-    it.only('returns false if not authorized', () => {
+    it('returns false if not authorized', () => {
       expect(authController.isAuthorized('admin')).to.be.false
       expect(user.isAuthorized.calledOnce).to.be.true
     })
@@ -56,14 +56,43 @@ describe('AuthController', () => {
   })
 
   describe('getIndex', () => {
-    it('should render index', () => {
-      const req = {}
+    let user = {}
+    beforeEach(() => {
+      user = {
+        roles: ['user'],
+        isAuthorized: function (needRole) {
+          return this.roles.indexOf(needRole) > -1
+        }
+      }
+      authController.setUser(user)
+    })
+
+    it('should render index if authorized', () => {
+      const isAuth = sinon.stub(user, 'isAuthorized').returns(true)
+      const req = {
+        user
+      }
       const res = {
         render: sinon.spy()
       }
       authController.getIndex(req, res)
+      expect(isAuth.calledOnce).to.be.true
       expect(res.render.calledOnce).to.be.true
       expect(res.render.firstCall.args[0]).to.equal('index')
+    })
+
+    it('should render error in case of exception', () => {
+      const isAuth = sinon.stub(user, 'isAuthorized').throws()
+      const req = {
+        user
+      }
+      const res = {
+        render: sinon.spy()
+      }
+      authController.getIndex(req, res)
+      expect(isAuth.calledOnce).to.be.true
+      expect(res.render.calledOnce).to.be.true
+      expect(res.render.firstCall.args[0]).to.equal('error')
     })
   })
 })
