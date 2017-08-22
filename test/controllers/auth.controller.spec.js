@@ -94,5 +94,20 @@ describe('AuthController', () => {
       expect(res.render.calledOnce).to.be.true
       expect(res.render.firstCall.args[0]).to.equal('error')
     })
+
+    it('should render index if authorized again', () => {
+      const isAuth = sinon.stub(user, 'isAuthorized').returns(true)
+      const req = {
+        user
+      }
+      const res = {
+        render: function () {}
+      }
+      const mock = sinon.mock(res)
+      mock.expects('render').once().withExactArgs('index')
+      authController.getIndex(req, res)
+      expect(isAuth.calledOnce).to.be.true
+      mock.verify()
+    })
   })
 })
