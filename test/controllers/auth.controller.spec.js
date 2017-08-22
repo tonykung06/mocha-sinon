@@ -1,5 +1,6 @@
 const AuthControllerFactory = require('../../controllers/auth.controller')
 const expect = require('chai').expect
+const sinon = require('sinon')
 
 beforeEach(function globalSetup () {
   console.log('global beforeEach is running for every unit test functions across all test files')
@@ -16,8 +17,21 @@ describe('AuthController', () => {
   // it.only, it.skip
   // this.skip
   describe('isAuthorized', () => {
-    it('returns false if not authorized', () => {
+    let user = {}
+    beforeEach(() => {
+      user = {
+        roles: ['user'],
+        isAuthorized: function (needRole) {
+          return this.roles.indexOf(needRole) > -1
+        }
+      }
+      sinon.spy(user, 'isAuthorized')
+      authController.setUser(user)
+    })
+
+    it.only('returns false if not authorized', () => {
       expect(authController.isAuthorized('admin')).to.be.false
+      expect(user.isAuthorized.calledOnce).to.be.true
     })
     it('returns true if authorized', () => {
       authController.setRoles(['user', 'admin'])
@@ -38,6 +52,18 @@ describe('AuthController', () => {
       authController.setRoles(['user', 'admin'])
       const result = await authController.isAuthorizedAsync('admin')
       expect(result).to.be.true
+    })
+  })
+
+  describe('getIndex', () => {
+    it('should render index', () => {
+      const req = {}
+      const res = {
+        render: sinon.spy()
+      }
+      authController.getIndex(req, res)
+      expect(res.render.calledOnce).to.be.true
+      expect(res.render.firstCall.args[0]).to.equal('index')
     })
   })
 })
