@@ -1,4 +1,4 @@
-const AuthControllerFactory = require('../../controllers/auth.controller')
+const AuthControllerFactory = require('../../controllers/authController')
 const expect = require('chai').expect
 const sinon = require('sinon')
 
